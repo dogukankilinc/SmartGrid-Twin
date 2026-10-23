@@ -1,5 +1,5 @@
 function app = GES_Baslat(mode)
-%GES_BASLAT BTÜ SmartGridLab GES dijital ikiz panelini tek komutla açar.
+%GES_BASLAT SmartGrid-Twin GES dijital ikiz panelini tek komutla açar.
 %   MATLAB'da proje klasörüne geçip yazın:   GES_Baslat            (tam: çekirdek + araştırma katmanı)
 %                                            GES_Baslat("cekirdek") (yalnız çekirdek: CNN ve LLM yüklenmez)
 %   1) Proje yollarını ekler
@@ -36,9 +36,9 @@ if layers == "full" && ~ollamaRunning()
 end
 
 if layers == "full"
-    fprintf("BTÜ SmartGridLab GES Paneli açılıyor (tam mod: CNN modelleri ve yerel LLM yüklenir)...\n");
+    fprintf("SmartGrid-Twin GES Paneli açılıyor (tam mod: CNN modelleri ve yerel LLM yüklenir)...\n");
 else
-    fprintf("BTÜ SmartGridLab GES Paneli açılıyor (çekirdek mod: CNN ve LLM yüklenmez)...\n");
+    fprintf("SmartGrid-Twin GES Paneli açılıyor (çekirdek mod: CNN ve LLM yüklenmez)...\n");
 end
 app = GesDashboard(Layers=layers);
 assignin("base", "gesApp", app);

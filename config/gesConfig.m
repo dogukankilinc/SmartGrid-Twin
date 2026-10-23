@@ -1,5 +1,5 @@
 function cfg = gesConfig()
-%GESCONFIG BTÜ SmartGridLab GES yapay zeka asistanının merkezi yapılandırması.
+%GESCONFIG SmartGrid-Twin GES yapay zeka asistanının merkezi yapılandırması.
 %   cfg = gesConfig() proje yollarını, eğitim/doğrulama/test ayrımını ve
 %   SmartGridLab (SMA Data Manager M + WR13TL22-8231 1.20 kWp tek fazlı evirici
 %   + Satellite Sensor) saha sabitlerini döndürür.
@@ -27,8 +27,8 @@ cfg.paths.throttleP   = fullfile(root, "artifacts", "v2", "throttle_p");
 cfg.files.m1          = "m1_expected_power_v2eval.mat";
 cfg.files.cnnDir      = "cnn_v2";
 
-% SmartGridLab (BTÜ Mimar Sinan Yerleşkesi, Yıldırım/Bursa) saha ve dizi sabitleri
-cfg.site.name            = "BTÜ SmartGridLab GES";
+% SmartGridLab (Saha Test Tesisi, 40.1878N, 29.1289E) saha ve dizi sabitleri
+cfg.site.name            = "SmartGrid-Twin GES";
 cfg.site.latitude        = 40.1878;
 cfg.site.longitude       = 29.1289;
 cfg.site.altitude        = 155;

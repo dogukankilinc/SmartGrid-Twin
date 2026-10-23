@@ -1,5 +1,5 @@
 classdef tGesIo < matlab.unittest.TestCase
-%TGESIO SMA CSV okuma ve veri hattı birim testleri (BTÜ SmartGridLab).
+%TGESIO SMA CSV okuma ve veri hattı birim testleri (SmartGrid-Twin).
 %   Test kapsamı:
 %   1. readSmaReport — sep=; format, 14 satır metadata atlatma, zaman ayrıştırma
 %   2. R_iso binlik ayraç ("3,000.00" → 3000)

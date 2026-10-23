@@ -1,5 +1,5 @@
 function setupGes()
-%SETUPGES BTÜ SmartGridLab GES proje klasörlerini MATLAB yoluna ekler.
+%SETUPGES SmartGrid-Twin GES proje klasörlerini MATLAB yoluna ekler.
 %   Her betiğin başında çağrılır; tekrar çağrılması zararsızdır.
 
 root = fileparts(mfilename("fullpath"));

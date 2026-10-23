@@ -1,5 +1,5 @@
 classdef GesDashboard < handle
-    %GESDASHBOARD BTÜ SmartGridLab & GES dijital ikiz paneli — üst menülü çok sayfalı arayüz, her sayfada asistan.
+    %GESDASHBOARD SmartGrid-Twin & GES dijital ikiz paneli — üst menülü çok sayfalı arayüz, her sayfada asistan.
     %   app = GesDashboard() — 15 dk adımlarla oynatır; başlıktaki tarih/saat seçiciyle veri aralığında
     %   istenen ana atlanır.
     %   Sayfalar (üst menü): Genel Bakış · Saha Haritası · Analiz · Tahmin & Erken Uyarı · Raporlar ·
@@ -60,7 +60,7 @@ classdef GesDashboard < handle
         PageIcons = ["📊" "🗺" "📈" "🔮" "📑" "🔔" "📂" "❓"]
         PageTopics = [ ...
             "tesis toplam anlık güç AC DC güç, evirici dönüşüm verimi eta, özgül güç kW/kWp, bugünkü aylık toplam üretim enerjisi, performans yüzdesi, haftalık aylık yıllık enerji grafiği, gökyüzü hava sıcaklık ışınım rüzgar hızı Faiman Ross hücre sıcaklığı, L1 şebeke gerilimi frekansı k/18 röle, yalıtım direnci R_iso, son 7 gün özeti"
-            "BTÜ SmartGridLab 5 düğümlü topoloji haritası, METEO-BTU PV-ARRAY WR13TL22-8231 GRID-PCC DATA-MANAGER düğümleri, kabin haritası, kutucuklar ve renkleri, durum alarm uyarı ısıl kısma kronik veri yok, anlık günlük haftalık değerlendirme, sayaç mutabakatı"
+            "SmartGrid-Twin 5 düğümlü topoloji haritası, METEO-SmartGrid-Twin PV-ARRAY WR13TL22-8231 GRID-PCC DATA-MANAGER düğümleri, kabin haritası, kutucuklar ve renkleri, durum alarm uyarı ısıl kısma kronik veri yok, anlık günlük haftalık değerlendirme, sayaç mutabakatı"
             "seçili invertörün 4 modlu mühendislik grafiği: güç ve POA ışınım, DC gerilim V_dc akım I_dc ve 4-kadranlı MPP zarfı, evirici verimi ve Faiman/Ross termal rüzgar ikizi, L1 şebeke gerilimi U_L1,cond frekans ve R_iso yalıtım direnci; skalogram (günlük / 7 günlük), teşhis ajanları 3 görüş CNN VLM elektriksel ikiz ve öz-akran karar, olaylar geçmişi, saha geri bildirimi"
             "gelecek tahmini, 48 saatlik üretim tahmini, hava ve rüzgar tahmini, yarın ısıl kısma ve termal kayıp tahmini, arıza riski, erken uyarı, R_iso yalıtım direnci düşüşü, kısa kopma, geriye dönük doğrulama, öncü süre"
             "kayıp dağılımı şelalesi, evirici verim eğrisi Sandia modeli, ısıl kısma ve Faiman rüzgar soğutması analizi, L1 şebeke gerilim yükselmesi Thevenin empedansı R_th, R_iso sabah çiyi nem profili, tozlanma oranı kirlenme hızı, bulutluluk oranı, degradasyon, bakım temizlik aralığı"
@@ -178,7 +178,7 @@ classdef GesDashboard < handle
             %SELECTMAPNODE Haritadaki 5 topoloji düğümünden birini seçer.
             node = string(node);
             app.MapNode = node;
-            mapModes = dictionary(["METEO-BTU" "PV-ARRAY" "WR13TL22-8231" "GRID-PCC" "DATA-MANAGER"], ...
+            mapModes = dictionary(["METEO-SmartGrid-Twin" "PV-ARRAY" "WR13TL22-8231" "GRID-PCC" "DATA-MANAGER"], ...
                 ["eff_thermal" "dc_mpp" "power" "grid_riso" "power"]);
             if isKey(mapModes, node)
                 app.ChartMode = mapModes(node);
@@ -832,7 +832,7 @@ classdef GesDashboard < handle
                         continue
                     end
                     app.ThermalNoteTime(key) = snap.Time;
-                    app.addNotification(sprintf("BTÜ SmartGridLab (%s): evirici ısıl kısmada / MPP dışı güç düşürmede (sıcaklık %.1f °C, son 2 saatte kayıp ≈ %s). " + ...
+                    app.addNotification(sprintf("SmartGrid-Twin (%s): evirici ısıl kısmada / MPP dışı güç düşürmede (sıcaklık %.1f °C, son 2 saatte kayıp ≈ %s). " + ...
                         "Rüzgar soğutmasını ve havalandırmayı kontrol edin.", ...
                         key, snap.Tcab(find(inC, 1)), energyText(sum(loss2h(th & inC)))), "check", snap.Time, "", "ISIL KISMA");
                 elseif k / n >= app.ThermalShare

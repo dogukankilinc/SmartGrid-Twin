@@ -3,7 +3,7 @@ function wx = fetchOpenMeteo(latitude, longitude, opts)
 %   wx = ges.forecast.fetchOpenMeteo(lat, lon) — timetable (yerel saat, 15 dk'ya enterpolasyon):
 %   GHI, DNI, DHI (W/m^2), Tamb (°C), Cloud (%), WindSpeed (m/s), Precip (mm).
 %   Open-Meteo ışınım değerleri ÖNCEKİ saatin ortalamasıdır; zaman damgaları aralık ortasına (−30 dk) kaydırılır.
-%   opts.AllowOfflineFallback = true ise bağlantı olmadığında Bursa açık/parçalı gök sentetik profili üretir.
+%   opts.AllowOfflineFallback = true ise bağlantı olmadığında Bölgesel açık/parçalı gök sentetik profili üretir.
 arguments
     latitude (1,1) double
     longitude (1,1) double

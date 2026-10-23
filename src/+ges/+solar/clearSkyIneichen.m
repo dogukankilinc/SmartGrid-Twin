@@ -3,9 +3,9 @@ function [ghi, dni, dhi, amAbs, i0, tl] = clearSkyIneichen(zenith, dayOfYear, al
 %   [ghi, dni, dhi, amAbs, i0, tl] = ges.solar.clearSkyIneichen(zenith, doy, altitude, TL)
 %   zenith          : güneş zenit açısı, derece
 %   dayOfYear       : yılın günü (1..366)
-%   altitude        : rakım, m (varsayılan: 155 m, Bursa BTÜ)
+%   altitude        : rakım, m (varsayılan: 155 m, SmartGrid-Twin)
 %   linkeTurbidity  : Linke bulanıklık katsayısı (skaler, vektör veya NaN/boş ise
-%                     Bursa mevsimsel sinüzoidal profili: TL(DOY) = 3.4 + 0.65*sin(2*pi*(DOY-80)/365))
+%                     Mevsimsel sinüzoidal Linke bulanıklık profili: TL(DOY) = 3.4 + 0.65*sin(2*pi*(DOY-80)/365))
 %
 %   Kaynak: Ineichen & Perez (2002), pvlib.clearsky.ineichen uygulaması.
 %   Kod üretimine uygundur.

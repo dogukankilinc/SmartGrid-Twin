@@ -1,6 +1,6 @@
 # 02 — Fiziksel Modelleme: Solar Geometri, Termal Dijital İkiz, Rüzgar Soğutması, Kirlenme ve Tahmin (`+solar`, `+soiling`, `+stats`, `+forecast`)
 
-> **Kapsam:** Bu doküman, Claude referans projesindeki `src/+ges/+solar/`, `src/+ges/+soiling/`, `src/+ges/+stats/`, `src/+ges/+forecast/` paketleri ile `scripts/v2/` (`a02`, `d01`, `d02`, `e01`, `f01`, `g01`, `h01`, `k01`, `k02`) betiklerinin matematiksel ve fiziksel analizini; ayrıca **BTÜ SmartGridLab (`SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** veri seti üzerinde keşfedilen **Yatay Sensör ($\beta=0^\circ$) vs. Eğimli Dizi ($\beta \approx 32^\circ$) Transpozisyonu**, **Sentetik Ross Sıcaklığı Yerine Rüzgar Soğutmalı Dinamik Faiman + $V_{dc}$ Hücre Termometresi**, **Sandia Evirici Dönüşüm Verimi Modeli** ve **`R_iso` Yüzey Islaklığı Doğrulamalı Kirlenme/Erken Uyarı** geliştirmelerini tanımlar.
+> **Kapsam:** Bu doküman, Claude referans projesindeki `src/+ges/+solar/`, `src/+ges/+soiling/`, `src/+ges/+stats/`, `src/+ges/+forecast/` paketleri ile `scripts/v2/` (`a02`, `d01`, `d02`, `e01`, `f01`, `g01`, `h01`, `k01`, `k02`) betiklerinin matematiksel ve fiziksel analizini; ayrıca **SmartGrid-Twin (`SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** veri seti üzerinde keşfedilen **Yatay Sensör ($\beta=0^\circ$) vs. Eğimli Dizi ($\beta \approx 32^\circ$) Transpozisyonu**, **Sentetik Ross Sıcaklığı Yerine Rüzgar Soğutmalı Dinamik Faiman + $V_{dc}$ Hücre Termometresi**, **Sandia Evirici Dönüşüm Verimi Modeli** ve **`R_iso` Yüzey Islaklığı Doğrulamalı Kirlenme/Erken Uyarı** geliştirmelerini tanımlar.
 
 ---
 
@@ -45,7 +45,7 @@ $G > 400\text{ W/m}^2$ adımlarında ham yatay $G$ ile normalize edilmiş DC ak�
 
 ### 1.4. Keşif 4: 27–31 Temmuz 2026 (4,5 Gün) "Sızıntısız Ön-Kalibrasyon (Zero-Leakage Warm-Up)" Penceresi ve Güneş Öğlesi
 * İlk CSV dosyasında (`2026-07-27 00:15` – `2026-07-31 15:00`, ~4,5 gün) evirici kapalı (`"-"`) iken meteoroloji kanalları (`G`, `T_amb`, `T_mod`, `WindSpeed`) %100 eksiksiz kayıt yapmıştır ($G_{\max} = 958\text{ W/m}^2$). Bu 4,5 günlük pencere, evirici üretim verisine hiç dokunmadan **Ineichen Linke Bulanıklık Katsayısı ($T_L$)** ve **Sensör Yönelimi ($\beta_{\text{sen}}=0^\circ$)** ön-kalibrasyonu için kullanılır.
-* Bursa ($\lambda = 29.1289^\circ\text{E}$) için gerçek güneş öğlesi UTC+3'te **13:03.5**'tir; veride $G$ ve $P_{\text{DC}}$ tepe saati medyanı **`13:00–13:15`** olarak doğrulanmıştır. `solarGeometry.m` içine SMA periyot sonu/ortası zaman damgası için `opts.TimeAlignment = "end" | "middle" | "start"` seçeneği eklenir.
+* Saha boylamı ($\lambda = 29.1289^\circ\text{E}$) için gerçek güneş öğlesi UTC+3'te **13:03.5**'tir; veride $G$ ve $P_{\text{DC}}$ tepe saati medyanı **`13:00–13:15`** olarak doğrulanmıştır. `solarGeometry.m` içine SMA periyot sonu/ortası zaman damgası için `opts.TimeAlignment = "end" | "middle" | "start"` seçeneği eklenir.
 
 ---
 
@@ -54,7 +54,7 @@ $G > 400\text{ W/m}^2$ adımlarında ham yatay $G$ ile normalize edilmiş DC ak�
 ```mermaid
 flowchart TD
     subgraph SolarPkg["1. Solar Geometri & Anizotropik Transpozisyon (+ges/+solar)"]
-        Sun["sunPosition.m & solarGeometry.m\nBTÜ Koordinatları (40.1878°N, 29.1289°E, 155m)\nθ_Z, γ_s, AM_abs, I_0"]
+        Sun["sunPosition.m & solarGeometry.m\nSmartGrid-Twin Koordinatları (40.1878°N, 29.1289°E, 155m)\nθ_Z, γ_s, AM_abs, I_0"]
         Ineichen["clearSkyIneichen.m\nMevsimsel Linke Bulanıklık Profili T_L(DOY)"]
         ErbsHDKR["transposeGhiToPoa.m & poaIrradiance.m\n• Erbs Difüz Ayrıştırması: G_GHI → (DNI, DHI)\n• HDKR Anizotropik Gökyüzü (β=32°, γ=178°)\n• ASHRAE IAM (b_0 = 0.05) → G_POA,eff"]
     end
@@ -82,7 +82,7 @@ flowchart TD
 ### 2.1. Solar Geometri ve Anizotropik POA Transpozisyonu (`src/+ges/+solar/`)
 
 1. **Mevsimsel Linke Bulanıklık Profili (`clearSkyIneichen.m`):**
-   Sabit `linkeTurbidity = 3.5` yerine Bursa atmosferi için yılın gününe ($\text{DOY}$) bağlı sinüzoidal bulanıklık profili kullanılır:
+   Sabit `linkeTurbidity = 3.5` yerine Saha mikroklima atmosferi için yılın gününe ($\text{DOY}$) bağlı sinüzoidal bulanıklık profili kullanılır:
    $$T_L(\text{DOY}) = T_{L,\text{mean}} + \Delta T_L \sin\left(\frac{2\pi(\text{DOY} - 80)}{365}\right), \qquad T_{L,\text{mean}} = 3.40, \quad \Delta T_L = 0.65$$
 2. **Erbs Difüz Ayrıştırması + HDKR Anizotropik Transpozisyonu + IAM (`poaIrradiance.m` & `transposeGhiToPoa.m`):**
    Claude `a02` ve `d01` içindeki açık-gök oranı ($G_{\text{arr}} = G_{\text{sen}} \cdot \text{POA}_{\text{cs,arr}}/\text{GHI}_{\text{cs}}$) bulutlu günlerde ($K_t < 0.5$) ışınımı **%60 fazla tahmin ettiği** için kaldırılmış; yerine 3 adımlı fiziksel transpozisyon getirilmiştir:

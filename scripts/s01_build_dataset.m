@@ -1,5 +1,5 @@
 %% S01_BUILD_DATASET  Faz 1a: SMA Sunny Portal CSV raporlarından birleşik cihaz zaman serileri.
-% SmartGridLab (BTÜ, WR13TL22-8231 1.20 kWp, Satellite Sensor) için uyarlanmış.
+% SmartGridLab (SmartGrid-Twin, WR13TL22-8231 1.20 kWp, Satellite Sensor) için uyarlanmış.
 % Her cihazın (invertör = K01-INV01, meteoroloji = K01-METEO, tesis = K01-PLANT) verilerini
 % 15 dakikalık düzenli timetable'da birleştirir ve artifacts/interim/<split>/<tür>/<Id>.mat kaydeder.
 % Eğitim ve holdout havuzları AYRI klasörlere yazılır.

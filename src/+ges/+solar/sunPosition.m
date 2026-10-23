@@ -2,8 +2,8 @@ function [zenith, azimuth, decl, eqTime] = sunPosition(jdUtc, latitude, longitud
 %SUNPOSITION Güneşin zenit ve azimut açısı (NOAA algoritması, ~0.01° doğruluk).
 %   [zenith, azimuth, decl, eqTime] = ges.solar.sunPosition(jdUtc, lat, lon)
 %   jdUtc     : UTC Jülyen günü (ör. juliandate(t) — t zaman dilimli ise UTC'ye çevrilir)
-%   latitude  : derece, kuzey pozitif (BTÜ SmartGridLab: 40.1878)
-%   longitude : derece, doğu pozitif (BTÜ SmartGridLab: 29.1289)
+%   latitude  : derece, kuzey pozitif (SmartGrid-Twin: 40.1878)
+%   longitude : derece, doğu pozitif (SmartGrid-Twin: 29.1289)
 %   zenith    : derece (90'dan büyükse güneş ufkun altında)
 %   azimuth   : derece, kuzeyden saat yönünde (180 = güney)
 %   decl      : güneş deklinasyon açısı, derece

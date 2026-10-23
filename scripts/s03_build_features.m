@@ -1,5 +1,5 @@
 %% S03_BUILD_FEATURES  Faz 1b-ii: Kalite bayrakları, POA transpozisyonu, Faiman sıcaklığı ve türetilmiş öznitelikler.
-% SmartGridLab (BTÜ, SMA WR13TL22-8231 1.20 kWp, Satellite Sensor) için uyarlanmış.
+% SmartGridLab (SmartGrid-Twin, SMA WR13TL22-8231 1.20 kWp, Satellite Sensor) için uyarlanmış.
 %
 % Girdi : artifacts/interim/{train,holdout}, orientation.mat (s02)
 % Çıktı :

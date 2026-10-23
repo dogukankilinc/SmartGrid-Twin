@@ -1,6 +1,6 @@
 # 03 — Anomali Tespiti, Üç Görüş (Three Opinions) Mimarisi, Fizik-RGB Skalogram ve Derin Öğrenme
 
-> **Kapsam:** Bu doküman, Claude referans projesindeki `+anomaly`, `+model`, `+label`, `+learning`, `+scalogram`, `+federated` ve `+opinions` paketleri ile `scripts/v2` ve `scripts/v3` deney zincirlerinin matematiksel ve algoritmik analizini; ayrıca **Bursa Teknik Üniversitesi (BTÜ) SmartGridLab (`SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** tek eviricili sistemi için tasarlanan **4-Kadranlı MPP Zarfı**, **$k/18$ Röle Görev Oranı De-aliasing**, **Elektriksel İkiz + Tarihsel Öz-Akran (3. Görüş)**, **Çift-Modlu Fizik-RGB Skalogram** ve **FedBN/AdaBN Alan Uyarlaması** mimarilerini referans düzeyinde tanımlar.
+> **Kapsam:** Bu doküman, Claude referans projesindeki `+anomaly`, `+model`, `+label`, `+learning`, `+scalogram`, `+federated` ve `+opinions` paketleri ile `scripts/v2` ve `scripts/v3` deney zincirlerinin matematiksel ve algoritmik analizini; ayrıca **Akıllı Şebekeler Araştırma Laboratuvarı SmartGridLab (`SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** tek eviricili sistemi için tasarlanan **4-Kadranlı MPP Zarfı**, **$k/18$ Röle Görev Oranı De-aliasing**, **Elektriksel İkiz + Tarihsel Öz-Akran (3. Görüş)**, **Çift-Modlu Fizik-RGB Skalogram** ve **FedBN/AdaBN Alan Uyarlaması** mimarilerini referans düzeyinde tanımlar.
 
 ---
 
@@ -137,7 +137,7 @@ Claude v3 mimarisinde (`RAPOR.md` §9.19) her evirici-günü birbirinden bağım
 
 ## 2. Tek Eviricili SmartGridLab (`WR13TL22-8231`) İçin Mimari Dönüşüm Tasarımı
 
-BTÜ Akıllı Şebekeler Laboratuvarı (`SmartGridLab`) veri setinde (`11` haftalık CSV, `2026-07-27` – `2026-10-18`, `7.406` adım) **tek bir evirici (`SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** yer almakta; buna karşılık Claude projesinde bulunmayan **L1 Şebeke Gerilimi/Akımı/Frekansı**, **AC ve DC Güç/Gerilim/Akım**, **DC Yalıtım Direnci (`R_iso`)**, **Rüzgar Hızı (`WindSpeed`)** ve **Aktif Güç Sınırlama Set Değeri (`SchedP_Pct`)** kanalları bulunmaktadır.
+SmartGrid-Twin Akıllı Şebekeler Laboratuvarı (`SmartGridLab`) veri setinde (`11` haftalık CSV, `2026-07-27` – `2026-10-18`, `7.406` adım) **tek bir evirici (`SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** yer almakta; buna karşılık Claude projesinde bulunmayan **L1 Şebeke Gerilimi/Akımı/Frekansı**, **AC ve DC Güç/Gerilim/Akım**, **DC Yalıtım Direnci (`R_iso`)**, **Rüzgar Hızı (`WindSpeed`)** ve **Aktif Güç Sınırlama Set Değeri (`SchedP_Pct`)** kanalları bulunmaktadır.
 
 ### 2.1. Tek Evirici İçin 3. Görüşün Yeniden Tasarımı: İki Katmanlı "Elektriksel İkiz ve Tarihsel Öz-Akran Görüşü" (`twinPeerOpinion`)
 

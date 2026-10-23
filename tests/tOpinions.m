@@ -1,5 +1,5 @@
 classdef tOpinions < matlab.unittest.TestCase
-%TOPINIONS 3-Görüş uzlaşı sistemi birim testleri (BTÜ SmartGridLab, tek evirici).
+%TOPINIONS 3-Görüş uzlaşı sistemi birim testleri (SmartGrid-Twin, tek evirici).
 %   Test kapsamı:
 %   1. consensus: boş ajan listesinde "veri_yok" döner
 %   2. sensorOpinion: qGridLoss=true → "grid_event" kararı

@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<title>BTÜ SmartGridLab — Dijital İkiz Topolojisi & Saha Haritası</title>
+<title>SmartGrid-Twin — Dijital İkiz Topolojisi & Saha Haritası</title>
 <style>
   :root {
     --bg: #f4f6f9; --card: #ffffff; --text: #1f2933; --muted: #6b7785; --border: #dfe4ea;
@@ -17,7 +17,7 @@
   .legend span { display: inline-flex; align-items: center; gap: 4px; cursor: help; }
   .legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
   .main-area { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; padding-right: 2px; }
-  /* 5-Düğümlü BTÜ SmartGridLab İnteraktif Topoloji Şeması */
+  /* 5-Düğümlü SmartGrid-Twin İnteraktif Topoloji Şeması */
   .topo-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
   .topo-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .topo-head h3 { margin: 0; font-size: 13px; color: #0b3d91; }
@@ -84,17 +84,17 @@
     <span class="lbl" id="hzLabel"></span>
   </div>
   <div class="legend" id="legend"></div>
-  <details class="help" id="help"><summary>BTÜ SmartGridLab 5-Düğümlü Topoloji & Durum Tanımları (kutucuk/düğüm tıklanınca sağda ilgili katman açılır)</summary><table id="helpTable"></table></details>
+  <details class="help" id="help"><summary>SmartGrid-Twin 5-Düğümlü Topoloji & Durum Tanımları (kutucuk/düğüm tıklanınca sağda ilgili katman açılır)</summary><table id="helpTable"></table></details>
   <div class="main-area">
     <div class="topo-box" id="topoBox">
       <div class="topo-head">
-        <h3>⚡ BTÜ Akıllı Şebekeler Laboratuvarı — Canlı Enerji Akışı ve 21-Sütun Dijital İkiz Topolojisi</h3>
+        <h3>⚡ SmartGrid-Twin Akıllı Şebekeler Laboratuvarı — Canlı Enerji Akışı ve 21-Sütun Dijital İkiz Topolojisi</h3>
         <small>Grafik katmanını değiştirmek için aşağıdaki 5 düğümden birine tıklayın</small>
       </div>
       <div class="topo-grid" id="topoGrid">
-        <div class="node-card" id="node-METEO-BTU" data-node="METEO-BTU" data-chart="eff_thermal">
+        <div class="node-card" id="node-METEO-SmartGrid-Twin" data-node="METEO-SmartGrid-Twin" data-chart="eff_thermal">
           <div>
-            <div class="node-top"><span class="node-title">1. METEO-BTU</span><span class="node-badge" id="nb-meteo">AÇIK</span></div>
+            <div class="node-top"><span class="node-title">1. METEO-SmartGrid-Twin</span><span class="node-badge" id="nb-meteo">AÇIK</span></div>
             <div class="node-metrics" id="nm-meteo">
               <div><span>POA / Yatay Işınım:</span><b id="v-g">—</b></div>
               <div><span>Ortam Sıcaklığı (T_amb):</span><b id="v-tamb">—</b></div>
@@ -241,7 +241,7 @@
     cabs.forEach(c => {
       const card = document.createElement("div");
       card.className = "cabin";
-      const cabTitle = cabs.length <= 1 ? `BTÜ SmartGridLab Saha Birimi (Kabin ${c.cabin} · SMA WR13TL22-8231)` : `Kabin ${c.cabin}`;
+      const cabTitle = cabs.length <= 1 ? `SmartGrid-Twin Saha Birimi (Kabin ${c.cabin} · SMA WR13TL22-8231)` : `Kabin ${c.cabin}`;
       card.innerHTML = `<h3>${cabTitle} <small id="cnt-${c.cabin}"></small></h3><div class="tiles"></div>`;
       const tiles = card.querySelector(".tiles");
       asArray(c.ids).forEach(id => {

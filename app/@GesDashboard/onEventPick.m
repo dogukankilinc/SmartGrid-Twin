@@ -23,7 +23,7 @@ if all(ismember("I_pv" + (1:8), vars)) && numel(d.info.Installed) >= 8 && nnz(d.
     dead = sf.Dead(:, pvIdx);
     yLbl = "PV" + pvIdx + " akımı / diğer dizilerin medyanı";
 else
-    % Tek MPPT / tek DC kanal (BTÜ SmartGridLab WR13TL22-8231)
+    % Tek MPPT / tek DC kanal (SmartGrid-Twin WR13TL22-8231)
     if ismember("I_dc", vars)
         idc = double(TT.I_dc);
     elseif ismember("I_pv1", vars)

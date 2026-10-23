@@ -2,7 +2,7 @@
 %GLOSSARY Panelde ve asistanda kullanılan kavramların Türkçe açıklamaları (tek kaynak).
 %   G = ges.agents.glossary() — struct dizisi: Term, Short (tek cümle), Long (ayrıntı).
 %   Yardım sayfası, harita ipuçları ve asistan aynı tanımları kullanır.
-%   BTÜ SmartGridLab: SMA-DATA-1:WR13TL22-8231, 1.20 kWp, tek faz (L1), tek MPPT.
+%   SmartGrid-Twin: SMA-DATA-1:WR13TL22-8231, 1.20 kWp, tek faz (L1), tek MPPT.
 t = {
 "k/18 röle alt-örnekleme yasası (şebeke çökmesi değildir)", ...
 "Sabah/akşam düşük ışınımda görülen 33,33 Hz (12/18), 41,67 Hz (15/18) frekans ve 151 V, 188 V gerilimler şebeke çökmesi değil, rölenin 15 dakikada 18 alt-örnekten k tanesinde kapalı olmasının sonucudur.", ...

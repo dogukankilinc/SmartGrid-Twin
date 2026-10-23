@@ -1,6 +1,6 @@
 # 04 — Dashboard UI (`@GesDashboard`), Web Harita/Sohbet, LLM/VLM Ajan ve Test Mimarisi
 
-> **Kapsam:** Bu doküman, Claude referans projesindeki `@GesDashboard` (MATLAB App Designer / `uifigure`), `app/web` (`plantmap.html`, `chat.html`, `notify.html`), `src/+ges/+agents/`, `src/+ges/+llm/` ve `tests/` katmanlarının satır bazlı teknik analizini; ayrıca **BTÜ Akıllı Şebekeler Laboratuvarı (`SmartGridLab — SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** için tasarlanan **5 Düğümlü İnteraktif Topoloji Haritası**, **4 Modlu Mühendislik Grafikleri**, **Sıfır Halüsinasyonlu BM25 Sayfa Asistanı (`PageChat`)** ve **Regresyon Test Altyapısını** tanımlar.
+> **Kapsam:** Bu doküman, Claude referans projesindeki `@GesDashboard` (MATLAB App Designer / `uifigure`), `app/web` (`plantmap.html`, `chat.html`, `notify.html`), `src/+ges/+agents/`, `src/+ges/+llm/` ve `tests/` katmanlarının satır bazlı teknik analizini; ayrıca **SmartGrid-Twin Akıllı Şebekeler Laboratuvarı (`SmartGridLab — SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** için tasarlanan **5 Düğümlü İnteraktif Topoloji Haritası**, **4 Modlu Mühendislik Grafikleri**, **Sıfır Halüsinasyonlu BM25 Sayfa Asistanı (`PageChat`)** ve **Regresyon Test Altyapısını** tanımlar.
 
 ---
 
@@ -65,7 +65,7 @@ Araç çağıran (tool-calling) küçük dil modellerinin parametre/fonksiyon uy
 
 ---
 
-## 2. BTÜ SmartGridLab (`WR13TL22-8231`) Arayüz, Harita ve Asistan Dönüşüm Tasarımı
+## 2. SmartGrid-Twin (`WR13TL22-8231`) Arayüz, Harita ve Asistan Dönüşüm Tasarımı
 
 ### 2.1. Kanonik Cihaz Kimliği ve `ReplayEngine.series()` Veri Sözleşmesi
 Ajan 1, Ajan 3 ve Ajan 4 arasındaki mimari bütünlüğü korumak üzere:
@@ -77,11 +77,11 @@ Ajan 1, Ajan 3 ve Ajan 4 arasındaki mimari bütünlüğü korumak üzere:
 
 ### 2.2. `app/web/plantmap.html` — 5 Düğümlü İnteraktif Laboratuvar Topoloji Haritası (%100 Sütun Kapsaması)
 
-99 kutucuklu kabin ızgarası yerine `plantmap.html`, **BTÜ Akıllı Şebekeler Laboratuvarı İnteraktif Dijital İkiz Topolojisi (Interactive SVG Power Flow + 5 Tıklanabilir Düğüm)** olarak tasarlanmıştır:
+99 kutucuklu kabin ızgarası yerine `plantmap.html`, **SmartGrid-Twin Akıllı Şebekeler Laboratuvarı İnteraktif Dijital İkiz Topolojisi (Interactive SVG Power Flow + 5 Tıklanabilir Düğüm)** olarak tasarlanmıştır:
 
 ```mermaid
 flowchart LR
-    N1["1. METEO-BTU\nMeteoroloji & Uydu Sensörü\n• G (GHI) & G_poa (32°)\n• T_amb, v_wind (m/s)\n• T_mod (Ross) vs T_cell (Faiman)\n• ΔT_wind Soğutma Kazancı"]
+    N1["1. METEO-SmartGrid-Twin\nMeteoroloji & Uydu Sensörü\n• G (GHI) & G_poa (32°)\n• T_amb, v_wind (m/s)\n• T_mod (Ross) vs T_cell (Faiman)\n• ΔT_wind Soğutma Kazancı"]
     N2["2. PV-ARRAY (1.20 kWp)\nPV Dizi & DC Bara\n• V_dc (149–256 V)\n• I_dc (0.013–5.90 A)\n• P_dc (kW), dV & dI (%)\n• R_iso (1153–3000 kΩ)"]
     N3["3. WR13TL22-8231\nSMA Sunny Boy Evirici\n• P_ac (kW) & P_spec (kW/kWp)\n• η_inv = P_ac/P_dc (~%93.5)\n• P_loss = P_dc - P_ac (W)\n• SchedP_Pct & qResetEvent"]
     N4["4. GRID-PCC (L1-L2-L3)\nŞebeke & k/18 Röle Arayüzü\n• L1: V_L1 & V_L1,cond (V)\n• I_L1 (A), f_grid (Hz), α_relay=k/18\n• S_ac (kVA), PF, R_th\n• L2/L3: 0.0V (Tek-Faz Onaylı)"]

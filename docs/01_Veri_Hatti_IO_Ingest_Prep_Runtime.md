@@ -1,6 +1,6 @@
 # 01 — Veri Hattı, Girdi/Çıktı, Veri Ambarı, Ön İşleme ve Çalışma Zamanı Mimarisi (`+io`, `+ingest`, `+prep`, `+runtime`, `config`)
 
-> **Kapsam:** Bu doküman, Claude referans projesindeki `config/gesConfig.m`, `src/+ges/+io/`, `src/+ges/+ingest/`, `src/+ges/+prep/`, `src/+ges/+runtime/ReplayEngine.m` ve `scripts/s00..s03`, `v2/a01`, `v2/a02` katmanlarının detaylı teknik analizini; ayrıca **Bursa Teknik Üniversitesi (BTÜ) Akıllı Şebekeler Laboratuvarı (`SmartGridLab — SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** 11 haftalık SMA Sunny Portal CSV verilerine uyarlanan **"Sıfır Veri Kaybı (Zero-Data-Loss)"** veri hattı tasarımını referans düzeyinde tanımlar.
+> **Kapsam:** Bu doküman, Claude referans projesindeki `config/gesConfig.m`, `src/+ges/+io/`, `src/+ges/+ingest/`, `src/+ges/+prep/`, `src/+ges/+runtime/ReplayEngine.m` ve `scripts/s00..s03`, `v2/a01`, `v2/a02` katmanlarının detaylı teknik analizini; ayrıca **Akıllı Şebekeler Araştırma Laboratuvarı Akıllı Şebekeler Laboratuvarı (`SmartGridLab — SMA-DATA-1:WR13TL22-8231`, `1.20 kWp`)** 11 haftalık SMA Sunny Portal CSV verilerine uyarlanan **"Sıfır Veri Kaybı (Zero-Data-Loss)"** veri hattı tasarımını referans düzeyinde tanımlar.
 
 ---
 
@@ -32,7 +32,7 @@ flowchart LR
     Meta & Header & Rows --> Parse --> Latch --> Coal --> Derive --> M & I & P
 ```
 
-| Özellik | Claude Projesi (Huawei SmartLogger) | BTÜ SmartGridLab (SMA Sunny Portal / Data Manager M) |
+| Özellik | Claude Projesi (Huawei SmartLogger) | SmartGrid-Twin (SMA Sunny Portal / Data Manager M) |
 | :--- | :--- | :--- |
 | **Dosya Sayısı ve Dönem** | 601 CSV (Ara 2023 – Tem 2025, 100 evirici) | **11 Haftalık CSV** (`27 Temmuz 2026 00:00 – 18 Ekim 2026 00:00`; `10–15 Ağustos 2026` haftası dışa aktarım boşluğu) |
 | **Satır ve Zaman Izgarası** | 52.579 adım × 99 evirici | **7.406 ham satır** (`8` dosyada `673` satır = $7\times 96 + 1$; `3` dosyada `674` satır) $\to$ **7.397 tekil zaman damgası** (`7.394` adet 15-dk adımı + `3` ızgara dışı olay satırı) |
@@ -101,7 +101,7 @@ flowchart LR
 * **Tesis ve Cihaz Sabitleri:**
   * `cfg.data.vendor = "SMA"` (`"Huawei"` | `"SMA"` | `"auto"`).
   * `cfg.data.ratedAcPower = 1.20` (`kW` / kurulu güç $1.20\text{ kWp}$), `cfg.data.numPhases = 1`, `cfg.data.numMppts = 1`, `cfg.data.numStrings = 1`, `cfg.data.meteoCabins = 1`.
-  * `cfg.site.name = "BTÜ SmartGridLab GES"`, `cfg.site.latitude = 40.1878`, `cfg.site.longitude = 29.1289`, `cfg.site.altitude = 155` (Bursa Teknik Üniversitesi Mimar Sinan Yerleşkesi).
+  * `cfg.site.name = "SmartGrid-Twin GES"`, `cfg.site.latitude = 40.1878`, `cfg.site.longitude = 29.1289`, `cfg.site.altitude = 155` (Akıllı Şebekeler Araştırma Laboratuvarı Saha Test Tesisi).
 * **Sızıntısız Kronolojik Blok Bölmesi (`cfg.split`):**
   * Tek evirici olduğu için `cfg.split.holdoutDevices = strings(0,1)` yapılır ve **haftalık dosya bazlı kronolojik ayrım** uygulanır:
     * **Eğitim (`train`):** `27 Temmuz 2026 – 19 Eylül 2026` (ilk 7 hafta, ~4.700 adım; 3 gerçek kesinti/reset olayı dahil).

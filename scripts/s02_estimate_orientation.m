@@ -1,5 +1,5 @@
 %% S02_ESTIMATE_ORIENTATION  Faz 1b-i: Uydu sensörü ve PV dizi geometrisini veriden kestirme.
-% SmartGridLab (BTÜ, Bursa) için uyarlanmış: tek uydu sensörü (K01-METEO, beta=0° / GHI),
+% SmartGridLab (SmartGrid-Twin) için uyarlanmış: tek uydu sensörü (K01-METEO, beta=0° / GHI),
 % tek evirici dizisi (K01-INV01, beta≈32° Güneye bakan).
 %
 % Adımlar:

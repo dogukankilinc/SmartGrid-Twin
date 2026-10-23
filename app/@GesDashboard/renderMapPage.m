@@ -1,5 +1,5 @@
 function renderMapPage(app, force) %#ok<INUSD>
-%RENDERMAPPAGE 5-düğümlü BTÜ SmartGridLab topolojisi + kutucuklar + seçili düğüm/evirici grafiği.
+%RENDERMAPPAGE 5-düğümlü SmartGrid-Twin topolojisi + kutucuklar + seçili düğüm/evirici grafiği.
 E = app.Engine;
 snap = E.snapshot();
 i = E.Index;

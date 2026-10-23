@@ -33,7 +33,7 @@ app.Fc.ThermalAxes = uiaxes(rg);
 disableDefaultInteractivity(app.Fc.ThermalAxes);
 app.Fc.ThermalText = uitextarea(rg, Editable="off", FontSize=11.5);
 lines = [
-    "BTÜ SmartGridLab Termal İkiz & Kısma Tahmini (Faiman Rüzgar Soğutmalı Model):"
+    "SmartGrid-Twin Termal İkiz & Kısma Tahmini (Faiman Rüzgar Soğutmalı Model):"
     "• T_cell,dyn = T_amb + G_poa / (U_0 + U_1 · v_wind) ile rüzgar hızının soğutma etkisi hesaba katılır."
     "• MPP zarfında dV > +6% ve dI < -8% (çalışma noktasının Voc'ye kayması) ile kısma ve verim kaybı öngörülür."];
 if ~isempty(app.Fc.K1) && isfield(app.Fc.K1, "res") && isfield(app.Fc.K1, "periods")
@@ -74,7 +74,7 @@ app.Fc.RiskText = uitextarea(g, Editable="off", FontSize=11.5);
 app.Fc.RiskText.Layout.Row = 2;
 app.Fc.RiskText.Layout.Column = 2;
 app.Fc.RiskText.Value = [
-    "BTÜ SmartGridLab Erken Uyarı ve Öncü Göstergeler (Precursors):"
+    "SmartGrid-Twin Erken Uyarı ve Öncü Göstergeler (Precursors):"
     ""
     "1) DC Yalıtım Direnci (R_iso [kOhm]) Zayıflaması:"
     "   • Tavan değer 3000 kOhm'dur. Sabah çiyi/nemde 1153–1350 kOhm bandına inip öğlen 3000 kOhm'a dönmesi normaldir."

@@ -1,5 +1,5 @@
 ﻿function r = diagnoseDay(ctx, id, day, opts)
-%DIAGNOSEDAY Bir evirici-günü (BTÜ SmartGridLab WR13TL22-8231) için üç bağımsız görüş + uzlaşı (LLM aracı: diagnose_day).
+%DIAGNOSEDAY Bir evirici-günü (SmartGrid-Twin WR13TL22-8231) için üç bağımsız görüş + uzlaşı (LLM aracı: diagnose_day).
 %   r = ges.agents.diagnoseDay(ctx, id, day)
 %   Çekirdek katman (her zaman):
 %     r.Numeric : 1. görüş — sensör ve fizik kuralları (dedektörler + etiketleme fonksiyonları): Label, Detail,

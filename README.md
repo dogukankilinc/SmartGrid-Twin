@@ -189,5 +189,5 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 
 ## ✉️ Contact & Acknowledgments
 - **Project Lead**: Doğukan Kılınç
-- **Institution / Affiliation**: Bursa Technical University Smart Grid Laboratory (`SmartGridLab`)
+- **Institution / Affiliation**: Renewable Energy Research Facility Smart Grid Laboratory (`SmartGridLab`)
 - For inquiries, collaborations, or bug reports, please open an Issue or Pull Request on GitHub.

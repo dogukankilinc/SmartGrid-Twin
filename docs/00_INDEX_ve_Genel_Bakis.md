@@ -1,6 +1,6 @@
-# 00 — Dokümantasyon İndeksi, Claude Referans Mimarisi ve BTÜ SmartGridLab Dönüşüm Özeti
+# 00 — Dokümantasyon İndeksi, Claude Referans Mimarisi ve SmartGrid-Twin Dönüşüm Özeti
 
-> **Proje Vizyonu:** Bu dokümantasyon seti, `Claude` referans projesinde (100 eviricili, 4 kabinli, 50 kW Huawei SUN2000 santrali) geliştirilen **Otonom GES Yapay Zekâ İzleme, Kestirimci Bakım, 3-Görüş Uzlaşısı ve Yerel LLM/VLM Dijital İkiz** platformunun tüm kaynak kodlarının, algoritmalarının ve deneysel sonuçlarının derinlemesine analizini; ve bu mimarinin **Bursa Teknik Üniversitesi (BTÜ) Akıllı Şebekeler Laboratuvarı (`SmartGridLab — SMA-DATA-1:WR13TL22-8231`, `1.200 kWp`)** sistemine **"Sıfır Atıl Veri (%100 Sütun Kullanımı)"** ilkesiyle uyarlanma tasarımını içerir.
+> **Proje Vizyonu:** Bu dokümantasyon seti, `Claude` referans projesinde (100 eviricili, 4 kabinli, 50 kW Huawei SUN2000 santrali) geliştirilen **Otonom GES Yapay Zekâ İzleme, Kestirimci Bakım, 3-Görüş Uzlaşısı ve Yerel LLM/VLM Dijital İkiz** platformunun tüm kaynak kodlarının, algoritmalarının ve deneysel sonuçlarının derinlemesine analizini; ve bu mimarinin **Akıllı Şebekeler Araştırma Laboratuvarı Akıllı Şebekeler Laboratuvarı (`SmartGridLab — SMA-DATA-1:WR13TL22-8231`, `1.200 kWp`)** sistemine **"Sıfır Atıl Veri (%100 Sütun Kullanımı)"** ilkesiyle uyarlanma tasarımını içerir.
 
 ---
 
@@ -47,9 +47,9 @@ flowchart TB
 
 ---
 
-## 3. Claude Mimarisi ile BTÜ SmartGridLab (`WR13TL22-8231`) Arasındaki Uçtan Uca Dönüşüm Mimarisi
+## 3. Claude Mimarisi ile SmartGrid-Twin (`WR13TL22-8231`) Arasındaki Uçtan Uca Dönüşüm Mimarisi
 
-BTÜ Akıllı Şebekeler Laboratuvarı (`SmartGridLab`) veri seti, çoklu kabin/evirici yerine **tek bir evirici (`SMA-DATA-1:WR13TL22-8231`, `1.200 kWp`)** içermekte; buna karşılık Claude projesinde eksik olan **Rüzgar Hızı (`WindSpeed`)**, **DC Yalıtım Direnci (`R_iso`)**, **L1 Şebeke Gerilim/Akım/Frekansı (`U_L1, I_L1, f_grid`)** ve **Aktif Güç Sınırlama/Reset (`SchedP_Pct`)** kanallarını sunmaktadır.
+SmartGrid-Twin Akıllı Şebekeler Laboratuvarı (`SmartGridLab`) veri seti, çoklu kabin/evirici yerine **tek bir evirici (`SMA-DATA-1:WR13TL22-8231`, `1.200 kWp`)** içermekte; buna karşılık Claude projesinde eksik olan **Rüzgar Hızı (`WindSpeed`)**, **DC Yalıtım Direnci (`R_iso`)**, **L1 Şebeke Gerilim/Akım/Frekansı (`U_L1, I_L1, f_grid`)** ve **Aktif Güç Sınırlama/Reset (`SchedP_Pct`)** kanallarını sunmaktadır.
 
 5 uzman ajanımızın ortak çalışmasıyla tasarlanan **Uçtan Uca SmartGridLab v3 Dijital İkiz Mimarisi** aşağıdadır:
 

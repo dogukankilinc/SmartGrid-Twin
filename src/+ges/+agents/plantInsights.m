@@ -1,5 +1,5 @@
 ﻿function out = plantInsights(ctx, topic)
-%PLANTINSIGHTS BTÜ SmartGridLab (WR13TL22-8231, 1.20 kWp) tesis analizlerinin özeti ve nedensel RAG bilgileri.
+%PLANTINSIGHTS SmartGrid-Twin (WR13TL22-8231, 1.20 kWp) tesis analizlerinin özeti ve nedensel RAG bilgileri.
 %   out = ges.agents.plantInsights(ctx, topic) — topic: kayip | kisma | tozlanma | bulut |
 %   degradasyon | bakim | nedensel | verim | termal | sebeke | yalitim | hepsi.
 %   Değerler artifacts/v2 altındaki betik çıktılarından (scripts/v2/*.m) OKUNUR; hiçbir sayı burada
@@ -14,7 +14,7 @@ end
 topic = lower(strtrim(topic));
 all = ["kayip" "kisma" "tozlanma" "bulut" "degradasyon" "bakim" "nedensel" "verim" "termal" "sebeke" "yalitim"];
 if topic == "hepsi"
-    out = struct("Donem", "2026-07-27 – 2026-10-17 (BTÜ SmartGridLab, 15 dk; çevrim dışı analiz)", ...
+    out = struct("Donem", "2026-07-27 – 2026-10-17 (SmartGrid-Twin, 15 dk; çevrim dışı analiz)", ...
         "Kaynak", "scripts/v2 betikleri, artifacts/v2 sonuç dosyaları");
     for t = all
         o = safeSection(ctx, t);
@@ -93,7 +93,7 @@ end
 
 v2 = fullfile(ctx.Cfg.paths.root, "artifacts", "v2");
 topic = lower(strtrim(topic));
-out = struct("Donem", "2026-07-27 – 2026-10-17 (BTÜ SmartGridLab, 15 dk; çevrim dışı analiz)", ...
+out = struct("Donem", "2026-07-27 – 2026-10-17 (SmartGrid-Twin, 15 dk; çevrim dışı analiz)", ...
     "Kaynak", "scripts/v2 betikleri, artifacts/v2 sonuç dosyaları");
 want = @(t) topic == "hepsi" || topic == t;
 

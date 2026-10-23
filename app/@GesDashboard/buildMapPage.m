@@ -1,5 +1,5 @@
 function buildMapPage(app, parent)
-%BUILDMAPPAGE Saha Haritası: BTÜ SmartGridLab 5-düğümlü interaktif topoloji (HTML) | seçili düğüm/evirici özeti ve grafiği.
+%BUILDMAPPAGE Saha Haritası: SmartGrid-Twin 5-düğümlü interaktif topoloji (HTML) | seçili düğüm/evirici özeti ve grafiği.
 g = uigridlayout(parent, [1 2], ColumnWidth={"2x", "1x"}, Padding=[2 2 2 2], ColumnSpacing=6);
 webDir = fullfile(fileparts(fileparts(mfilename("fullpath"))), "web");
 app.Mp.Html = uihtml(g, HTMLSource=fullfile(webDir, "plantmap.html"), ...
