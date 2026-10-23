@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Bakım asistanı</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --text: #1f2933; --muted: #6b7785; --border: #dfe4ea;
+    --user: #1a73e8; --id: #0b3d91;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif; font-size: 12.5px; }
+  #log { height: 100%; overflow-y: auto; padding: 8px 10px; }
+  .row { display: block; margin: 0 0 9px; }
+  .row.user { text-align: right; }
+  .row.assistant { text-align: left; }
+  .who { display: block; font-size: 11px; font-weight: 700; margin: 0 6px 2px; color: var(--muted); }
+  .row.user .who { color: var(--user); }
+  .msg { display: inline-block; text-align: left; max-width: 88%; padding: 7px 11px; border-radius: 12px;
+    white-space: pre-wrap; line-height: 1.45; overflow-wrap: anywhere; word-break: break-word; }
+  .row.user .msg { background: var(--user); color: #fff; border-bottom-right-radius: 3px; }
+  .row.assistant .msg { background: var(--card); border: 1px solid var(--border); border-bottom-left-radius: 3px; }
+  .row.assistant .msg b { color: var(--id); }
+  .row.user .msg b { color: #fff; }
+  .tools { display: block; font-size: 10.5px; color: var(--muted); margin: 3px 6px 0; }
+  .page { font-weight: 400; color: var(--muted); }
+  .go { display: inline-block; margin: 4px 6px 0; padding: 3px 10px; border: 1px solid var(--user); border-radius: 12px;
+    color: var(--user); background: #fff; cursor: pointer; font-size: 11.5px; }
+  .go:hover { background: var(--user); color: #fff; }
+  .typing .msg { color: var(--muted); font-style: italic; }
+  .dots::after { content: ""; animation: dots 1.2s steps(4, end) infinite; }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+</style>
+</head>
+<body>
+<div id="log"></div>
+<script>
+  function asArray(x) { return Array.isArray(x) ? x : (x === undefined || x === null ? [] : [x]); }
+  function txt(v) {
+    if (typeof v === "string") return v;
+    if (v === undefined || v === null || (Array.isArray(v) && v.length === 0)) return "";
+    return String(v);
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function emph(s) {
+    return esc(s).replace(/(K\d{2}-INV\d{2}|Kabin-\d+ INV-\d+|Kabin \d+|WR13TL22-8231|SMA-DATA-1|SmartGridLab|BTÜ SmartGridLab|R_iso|U_L1,cond|Faiman)/g, "<b>$1</b>");
+  }
+
+  function render(data) {
+    const log = document.getElementById("log");
+    const keys = asArray(data.goKeys);
+    const rows = asArray(data.items).map((m, i) => ({ m: m, key: txt(keys[i]) })).filter(x => txt(x.m.text) !== "").map(x => {
+      const m = x.m;
+      const user = txt(m.role) === "user";
+      const toolText = txt(m.tools);
+      const page = txt(m.page);
+      const who = user ? `Siz${page ? ` <span class="page">· ${esc(page)}</span>` : ""}` : "Asistan";
+      const tools = (!user && toolText) ? `<div class="tools">${esc(toolText)}</div>` : "";
+      const go = (!user && txt(m.go) && x.key) ? `<div><span class="go" data-page="${esc(x.key)}">→ ${esc(txt(m.go))} sayfasına git</span></div>` : "";
+      return `<div class="row ${user ? "user" : "assistant"}"><div class="who">${who}</div>` +
+             `<div class="msg">${emph(txt(m.text))}</div>${tools}${go}</div>`;
+    });
+    const typing = txt(data.typing);
+    if (typing) {
+      rows.push(`<div class="row assistant typing"><div class="who">Asistan</div>` +
+                `<div class="msg"><span class="dots">${esc(typing)}</span></div></div>`);
+    }
+    log.innerHTML = rows.join("");
+    log.querySelectorAll(".go").forEach(b => b.addEventListener("click", () => {
+      window.htmlComponent.sendEventToMATLAB("goPage", { page: b.dataset.page });
+    }));
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function setup(htmlComponent) {
+    window.htmlComponent = htmlComponent;
+    htmlComponent.addEventListener("set", e => render(e.Data));
+    htmlComponent.sendEventToMATLAB("ready", {});
+  }
+</script>
+</body>
+</html>

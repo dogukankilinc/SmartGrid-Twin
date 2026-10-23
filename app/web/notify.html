@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Bildirimler</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --text: #1f2933; --muted: #6b7785; --border: #dfe4ea; --id: #0b3d91;
+    --alarm: #d93025; --check: #ef8a2c; --info: #e0ad10; --llm: #7b4fb0; --vlm: #1a73e8;
+    --seek: #46525f; --feedback: #2e9d58; --system: #9aa5b1; --error: #8a1c14;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif; font-size: 12px; }
+  #list { height: 100%; overflow-y: auto; padding: 6px 8px; }
+  .card { display: block; margin: 0 0 5px; background: var(--card); border: 1px solid var(--border);
+    border-left: 4px solid var(--system); border-radius: 6px; padding: 5px 9px 6px; }
+  .head { display: flex; gap: 6px; align-items: center; margin-bottom: 2px; flex-wrap: wrap; }
+  .time { font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .chip { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 9px; color: #fff;
+    background: var(--system); letter-spacing: .3px; }
+  .chip.pending { background: transparent; color: var(--llm); border: 1px dashed var(--llm); font-weight: 600; }
+  .text { white-space: pre-wrap; line-height: 1.4; overflow-wrap: anywhere; }
+  .text b { color: var(--id); }
+  .empty { color: var(--muted); padding: 10px; }
+  .alarm { border-left-color: var(--alarm); }    .chip.alarm { background: var(--alarm); }
+  .check { border-left-color: var(--check); }    .chip.check { background: var(--check); }
+  .info { border-left-color: var(--info); }      .chip.info { background: var(--info); color: #3b2f00; }
+  .llm { border-left-color: var(--llm); }        .chip.llm { background: var(--llm); }
+  .vlm { border-left-color: var(--vlm); }        .chip.vlm { background: var(--vlm); }
+  .seek { border-left-color: var(--seek); }      .chip.seek { background: var(--seek); }
+  .feedback { border-left-color: var(--feedback); } .chip.feedback { background: var(--feedback); }
+  .error { border-left-color: var(--error); }    .chip.error { background: var(--error); }
+</style>
+</head>
+<body>
+<div id="list"><div class="empty">Henüz bildirim yok. ▶ Oynat ile otonom izleme başlar; yeni arıza ve uyarılar burada en üstte görünür.</div></div>
+<script>
+  const LABEL = { alarm: "ARIZA", check: "MANUEL KONTROL", info: "BİLGİ", llm: "LLM AÇIKLAMASI", vlm: "VLM 2. GÖRÜŞ",
+                  seek: "ZAMAN", feedback: "GERİ BİLDİRİM", system: "SİSTEM", error: "HATA" };
+  function asArray(x) { return Array.isArray(x) ? x : (x === undefined || x === null ? [] : [x]); }
+  function txt(v) {
+    if (typeof v === "string") return v;
+    if (v === undefined || v === null || (Array.isArray(v) && v.length === 0)) return "";
+    return String(v);
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function emph(s) {
+    return esc(s).replace(/(K\d{2}-INV\d{2}|Kabin-\d+ INV-\d+|Kabin \d+|WR13TL22-8231|SMA-DATA-1|SmartGridLab|BTÜ SmartGridLab)/g, "<b>$1</b>");
+  }
+
+  function render(data) {
+    const items = asArray(data.items);
+    const list = document.getElementById("list");
+    if (items.length === 0) return;
+    list.innerHTML = items.map(it => {
+      const kind = LABEL[txt(it.kind)] ? txt(it.kind) : "system";
+      const llm = it.llm === true ? `<span class="chip llm">LLM ile yazıldı</span>` : "";
+      const pending = it.pending === true ? `<span class="chip pending">⏳ LLM yazıyor…</span>` : "";
+      return `<div class="card ${kind}"><div class="head"><span class="time">${esc(txt(it.time))}</span>` +
+             `<span class="chip ${kind}">${esc(txt(it.tag) || LABEL[kind])}</span>${llm}${pending}</div>` +
+             `<div class="text">${emph(txt(it.text))}</div></div>`;
+    }).join("");
+  }
+
+  function setup(htmlComponent) {
+    htmlComponent.addEventListener("set", e => render(e.Data));
+    htmlComponent.sendEventToMATLAB("ready", {});
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+%% L04_FEDERATED_V2  v2-L4: çok tesisli federe öğrenme — FedAvg / FedProx / FedBN + yeni tesise etiketsiz uyarlama.
+% Soru 1: Tesisler ham veriyi paylaşmadan (yalnızca model parametreleri) ortak bir arıza sınıflandırıcısı
+%         eğitebilir mi; tesisler arası farkı (dizi yönelimi → skalogramda özellik kayması) hangi yöntem tutar?
+%   İstemciler: 4 kabin (2, 3, 12, 15) = 4 "tesis". Veri: scalogram_v2 (v2 etiketleri), sınıflar 5.
+%   Yöntemler (aynı küçük BatchNorm'lu CNN, ges.federated.compactNet; aynı toplam epoch):
+%     Merkezi      : tüm veri tek yerde (gizlilik yok; üst sınır)
+%     Yerel        : her tesis yalnızca kendi verisiyle (paylaşım yok)
+%     FedAvg       : tur başına her tesiste 1 yerel epoch, tüm parametrelerin ağırlıklı ortalaması
+%     FedProx μ    : FedAvg + yerel kayba yakınsal terim (istemci kaymasını sınırlar)
+%     FedBN        : BatchNorm katmanları tesiste kalır, diğer parametreler ortalanır (kişiselleştirme)
+%   Değerlendirme: her tesisin dev'i (v2-L03 ile AYNI gruplu bölme: görülmemiş invertörler + Mayıs 2025);
+%   küresel modeller her tesiste aynı, FedBN/Yerel her tesiste o tesisin kendi modeli.
+% Soru 2 (yeni tesis): bir kabin dışarıda tutulur; federe model diğer 3 kabinde eğitilir ve dışarıdaki kabine
+%   ETİKETSİZ aktarılır: (a) FedAvg olduğu gibi, (b) FedAvg + AdaBN (BN istatistikleri hedefin etiketsiz
+%   görüntülerinden), (c) FedBN + AdaBN (paylaşılan katmanlar + hedef BN istatistikleri, BN ölçekleri
+%   istemci ortalaması). Üst sınır: hedef tesisin kendi etiketleriyle yerel model.
+% Tekrar: 3 tohum (ortalama ± std). Test dilimi kullanılmaz (v2-L05'te, bir kez).
+% Çıktı: artifacts/models/federated_v2/*.mat, artifacts/v2/l04_federated.mat, artifacts/logs/v2_l04.log,
+%        artifacts/figures/f15_federated_v2.png
+
+clear;
+root = fileparts(fileparts(fileparts(mfilename("fullpath"))));
+addpath(root);
+setupGes();
+cfg = gesConfig();
+logFile = fullfile(root, "artifacts", "logs", "v2_l04.log");
+writelines("=== v2-L04 federe öğrenme " + string(datetime("now")), logFile);
+logMsg = @(m) writelines(string(datetime("now", Format="HH:mm:ss")) + "  " + string(m), logFile, WriteMode="append");
+tStart = tic;
+rounds = 30;
+seeds = 1:3;
+mu = 0.01;
+lr = 1e-3;
+outDir = fullfile(cfg.paths.models, "federated_v2");
+if ~isfolder(outDir), mkdir(outDir); end
+
+%% Veri (bellekte; 64×64×3)
+sroot = fullfile(root, "scalogram_v2");
+L = load(fullfile(sroot, "labels.mat"));
+classes = L.classes;
+cats = categorical(classes, classes);
+E = load(fullfile(cfg.paths.models, "cnn_v2", "ensemble.mat")).ensemble;   % v2-L03 ile aynı dev bölmesi
+devIds = E.DevIds;
+real = L.chosen;
+trainT = [real(real.Split == "train" & ~ismember(real.Id, devIds), ["File" "Id" "Label"])
+          L.synthetic(~ismember(L.synthetic.Id, devIds), ["File" "Id" "Label"])];
+devT = [real(real.Split == "train" & ismember(real.Id, devIds), ["File" "Id" "Label"])
+        real(real.Split == "val", ["File" "Id" "Label"])];
+Xtr = readImages(sroot, trainT.File);
+Xdv = readImages(sroot, devT.File);
+Ytr = categorical(string(trainT.Label), classes);
+Ydv = categorical(string(devT.Label), classes);
+siteTr = double(extractBetween(trainT.Id, "K", "-"));
+siteDv = double(extractBetween(devT.Id, "K", "-"));
+sites = unique(siteTr)';
+nS = numel(sites);
+for s = sites
+    logMsg(sprintf("Tesis (kabin %d): eğitim %d [%s] · dev %d", s, nnz(siteTr == s), ...
+        strjoin(string(countcats(Ytr(siteTr == s))'), " "), nnz(siteDv == s)));
+end
+cw = @(y) normw(1 ./ sqrt(max(countcats(y)', 1)));
+f1 = @(scores, y) metricsOf(scores, y, classes);
+nPar = sum(cellfun(@numel, ges.federated.compactNet(numel(classes)).Learnables.Value));
+logMsg(sprintf("Model: küçük BN'li CNN, %.0f bin parametre; tur başına iletişim ≈ %.2f MB/tesis (çift yön)", nPar / 1e3, 2 * 4 * nPar / 1e6));
+
+%% Soru 1: 4 tesis
+methods = ["Merkezi" "Yerel" "FedAvg" "FedProx" "FedBN"];
+R = nan(numel(seeds), numel(methods), nS + 2);           % [tesis F1 ×nS, havuz macroF1, havuz L1F1]
+curve = nan(numel(seeds), numel(methods), rounds);
+for si = 1:numel(seeds)
+    seed = seeds(si);
+    net0 = ges.federated.compactNet(numel(classes), Seed=seed);
+    rng(seed);
+    % Merkezi
+    netC = net0;
+    for r = 1:rounds
+        netC = ges.federated.localTrain(netC, Xtr, Ytr, Epochs=1, LearnRate=lr, ClassWeights=cw(Ytr));
+        curve(si, 1, r) = f1(ges.federated.predictScores(netC, Xdv), Ydv).MacroF1;
+    end
+    R(si, 1, :) = evalGlobal(netC, Xdv, Ydv, siteDv, sites, f1);
+    % Yerel (her tesis kendi verisiyle, aynı epoch sayısı)
+    locals = cell(1, nS);
+    for k = 1:nS
+        m = siteTr == sites(k);
+        locals{k} = ges.federated.localTrain(net0, Xtr(:, :, :, m), Ytr(m), Epochs=rounds, LearnRate=lr, ClassWeights=cw(Ytr(m)));
+    end
+    R(si, 2, :) = evalPersonal(locals, Xdv, Ydv, siteDv, sites, f1);
+    % FedAvg / FedProx / FedBN
+    for j = 3:5
+        g = net0;
+        pers = repmat({net0}, 1, nS);
+        nk = arrayfun(@(s) nnz(siteTr == s), sites);
+        for r = 1:rounds
+            upd = cell(1, nS);
+            for k = 1:nS
+                m = siteTr == sites(k);
+                start = g;
+                if methods(j) == "FedBN"
+                    start = ges.federated.mergeShared(pers{k}, g);
+                end
+                upd{k} = ges.federated.localTrain(start, Xtr(:, :, :, m), Ytr(m), Epochs=1, LearnRate=lr, ...
+                    ClassWeights=cw(Ytr(m)), Mu=mu * (methods(j) == "FedProx"), GlobalNet=g);
+            end
+            g = ges.federated.aggregate(upd, nk, ExcludeBN=methods(j) == "FedBN");
+            if methods(j) == "FedBN"
+                pers = cellfun(@(p) ges.federated.mergeShared(p, g), upd, UniformOutput=false);
+                curve(si, j, r) = poolPersonal(pers, Xdv, Ydv, siteDv, sites, f1);
+            else
+                curve(si, j, r) = f1(ges.federated.predictScores(g, Xdv), Ydv).MacroF1;
+            end
+        end
+        if methods(j) == "FedBN"
+            R(si, j, :) = evalPersonal(pers, Xdv, Ydv, siteDv, sites, f1);
+            save(fullfile(outDir, sprintf("fedbn_seed%d.mat", seed)), "pers", "g", "sites", "classes");
+        else
+            R(si, j, :) = evalGlobal(g, Xdv, Ydv, siteDv, sites, f1);
+            save(fullfile(outDir, sprintf("%s_seed%d.mat", lower(methods(j)), seed)), "g", "sites", "classes");
+        end
+    end
+    logMsg(sprintf("Tohum %d bitti (%.0f dk)", seed, toc(tStart) / 60));
+end
+logMsg("SORU 1 — dev macro-F1 (3 tohum ortalama ± std); tesis sütunları o tesisin dev'inde macro-F1:");
+logMsg(sprintf("  %-8s %s | havuz macroF1 | havuz L1-F1", "Yöntem", strjoin(compose("kabin %-6d", sites), " ")));
+for j = 1:numel(methods)
+    mu_ = squeeze(mean(R(:, j, :), 1));
+    sd_ = squeeze(std(R(:, j, :), 0, 1));
+    logMsg(sprintf("  %-8s %s | %.3f ± %.3f | %.3f ± %.3f", methods(j), strjoin(compose("%.3f±%.3f", mu_(1:nS), sd_(1:nS)), " "), ...
+        mu_(nS + 1), sd_(nS + 1), mu_(nS + 2), sd_(nS + 2)));
+end
+
+%% Soru 2: yeni tesis (bir kabin dışarıda, etiketsiz uyarlama)
+targets = sites;
+variants = ["FedAvg" "FedAvg+AdaBN" "FedBN+AdaBN" "Hedef-yerel (etiketli, üst sınır)"];
+Z = nan(numel(seeds), numel(variants), numel(targets));
+for si = 1:numel(seeds)
+    seed = seeds(si);
+    net0 = ges.federated.compactNet(numel(classes), Seed=seed);
+    for ti = 1:numel(targets)
+        tgt = targets(ti);
+        src = sites(sites ~= tgt);
+        nk = arrayfun(@(s) nnz(siteTr == s), src);
+        mT = siteTr == tgt;
+        mD = siteDv == tgt;
+        for mode = ["FedAvg" "FedBN"]
+            g = net0;
+            pers = repmat({net0}, 1, numel(src));
+            for r = 1:rounds
+                upd = cell(1, numel(src));
+                for k = 1:numel(src)
+                    m = siteTr == src(k);
+                    start = g;
+                    if mode == "FedBN"
+                        start = ges.federated.mergeShared(pers{k}, g);
+                    end
+                    upd{k} = ges.federated.localTrain(start, Xtr(:, :, :, m), Ytr(m), Epochs=1, LearnRate=lr, ClassWeights=cw(Ytr(m)));
+                end
+                g = ges.federated.aggregate(upd, nk, ExcludeBN=mode == "FedBN");
+                if mode == "FedBN"
+                    pers = cellfun(@(p) ges.federated.mergeShared(p, g), upd, UniformOutput=false);
+                end
+            end
+            if mode == "FedAvg"
+                Z(si, 1, ti) = f1(ges.federated.predictScores(g, Xdv(:, :, :, mD)), Ydv(mD)).MacroF1;
+                ga = ges.federated.adaptBN(g, Xtr(:, :, :, mT));                      % hedefin ETİKETSİZ görüntüleri
+                Z(si, 2, ti) = f1(ges.federated.predictScores(ga, Xdv(:, :, :, mD)), Ydv(mD)).MacroF1;
+            else
+                gb = ges.federated.aggregate(pers, nk);                                % BN ölçekleri: istemci ortalaması
+                gb = ges.federated.mergeShared(gb, g);
+                gb = ges.federated.adaptBN(gb, Xtr(:, :, :, mT));
+                Z(si, 3, ti) = f1(ges.federated.predictScores(gb, Xdv(:, :, :, mD)), Ydv(mD)).MacroF1;
+            end
+        end
+        loc = ges.federated.localTrain(net0, Xtr(:, :, :, mT), Ytr(mT), Epochs=rounds, LearnRate=lr, ClassWeights=cw(Ytr(mT)));
+        Z(si, 4, ti) = f1(ges.federated.predictScores(loc, Xdv(:, :, :, mD)), Ydv(mD)).MacroF1;
+        logMsg(sprintf("  tohum %d, yeni tesis = kabin %d: %s", seed, tgt, strjoin(compose("%s %.3f", variants', squeeze(Z(si, :, ti))'), " · ")));
+    end
+end
+logMsg("SORU 2 — yeni tesise etiketsiz aktarım, hedef dev macro-F1 (3 tohum ort.):");
+for v = 1:numel(variants)
+    zz = squeeze(mean(Z(:, v, :), 1));
+    logMsg(sprintf("  %-34s %s | ortalama %.3f", variants(v), strjoin(compose("kabin %d %.3f", targets', zz), ", "), mean(zz)));
+end
+save(fullfile(root, "artifacts", "v2", "l04_federated.mat"), "R", "Z", "curve", "methods", "variants", "sites", "seeds", "rounds", "mu", "nPar");
+
+fig = figure(Visible="off", Position=[80 80 1000 420]);
+tl = tiledlayout(fig, 1, 2, TileSpacing="compact");
+ax = nexttile(tl);
+hold(ax, "on");
+for j = 1:numel(methods)
+    plot(ax, 1:rounds, squeeze(mean(curve(:, j, :), 1)), LineWidth=1.6);
+end
+hold(ax, "off");
+legend(ax, methods, Location="southeast");
+xlabel(ax, "Tur (federe) / epoch (merkezi)");
+ylabel(ax, "Dev macro-F1");
+title(ax, "4 kabin = 4 tesis, veri tesisten çıkmaz");
+grid(ax, "on");
+ax = nexttile(tl);
+bar(ax, categorical(variants, variants), squeeze(mean(mean(Z, 3), 1)));
+ylabel(ax, "Hedef tesis dev macro-F1 (ortalama)");
+title(ax, "Yeni tesise etiketsiz aktarım (bir kabin dışarıda)");
+grid(ax, "on");
+exportgraphics(fig, fullfile(root, "artifacts", "figures", "f15_federated_v2.png"), Resolution=130);
+close(fig);
+logMsg("=== v2-L04 bitti " + string(datetime("now")) + sprintf(" (%.0f dk)", toc(tStart) / 60));
+
+%% ---------------------------------------------------------------------------
+function r = evalGlobal(net, X, Y, site, sites, f1)
+S = ges.federated.predictScores(net, X);
+r = zeros(1, numel(sites) + 2);
+for k = 1:numel(sites)
+    m = site == sites(k);
+    r(k) = f1(S(m, :), Y(m)).MacroF1;
+end
+mm = f1(S, Y);
+r(end - 1:end) = [mm.MacroF1 mm.L1F1];
+end
+
+function r = evalPersonal(nets, X, Y, site, sites, f1)
+S = zeros(size(X, 4), numel(categories(Y)));
+r = zeros(1, numel(sites) + 2);
+for k = 1:numel(sites)
+    m = site == sites(k);
+    S(m, :) = ges.federated.predictScores(nets{k}, X(:, :, :, m));
+    r(k) = f1(S(m, :), Y(m)).MacroF1;
+end
+mm = f1(S, Y);
+r(end - 1:end) = [mm.MacroF1 mm.L1F1];
+end
+
+function v = poolPersonal(nets, X, Y, site, sites, f1)
+r = evalPersonal(nets, X, Y, site, sites, f1);
+v = r(end - 1);
+end
+
+function m = metricsOf(S, y, classes)
+[~, i] = max(S, [], 2);
+cats = categorical(classes, classes);
+m = ges.model.classificationMetrics(y, cats(i(:))', classes);
+end
+
+function X = readImages(sroot, files)
+X = zeros(64, 64, 3, numel(files), "single");
+for i = 1:numel(files)
+    im = imread(fullfile(sroot, files(i)));
+    if size(im, 1) ~= 64
+        im = imresize(im, [64 64], "nearest");
+    end
+    X(:, :, :, i) = single(im) / 255;
+end
+end
+
+function w = normw(w)
+w = w / mean(w);
+end

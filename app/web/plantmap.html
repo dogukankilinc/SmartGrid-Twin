@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>BTÜ SmartGridLab — Dijital İkiz Topolojisi & Saha Haritası</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --text: #1f2933; --muted: #6b7785; --border: #dfe4ea;
+    --ok: #2e9d58; --watch: #e9b824; --warning: #ef8a2c; --alarm: #d93025; --chronic: #c8741f;
+    --grid: #7b4fb0; --offline: #9aa5b1; --night: #46525f; --sel: #1a73e8; --thermal: #c2185b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif; font-size: 12px; }
+  .wrap { display: grid; grid-template-rows: auto auto auto 1fr; height: 100%; padding: 6px; gap: 6px; overflow: hidden; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 4px; cursor: help; }
+  .legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .main-area { display: flex; flex-direction: column; gap: 8px; min-height: 0; overflow-y: auto; padding-right: 2px; }
+  /* 5-Düğümlü BTÜ SmartGridLab İnteraktif Topoloji Şeması */
+  .topo-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+  .topo-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .topo-head h3 { margin: 0; font-size: 13px; color: #0b3d91; }
+  .topo-head small { color: var(--muted); font-size: 11px; }
+  .topo-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: stretch; position: relative; }
+  .node-card { background: #fbfcfe; border: 2px solid var(--border); border-radius: 8px; padding: 7px 8px; cursor: pointer;
+    display: flex; flex-direction: column; justify-content: space-between; transition: all .2s; position: relative; }
+  .node-card:hover { border-color: #90b8f8; transform: translateY(-1px); }
+  .node-card.sel { border-color: var(--sel); box-shadow: 0 0 0 2px rgba(26,115,232,.25); background: #f0f6ff; }
+  .node-top { display: flex; justify-content: space-between; align-items: center; gap: 4px; margin-bottom: 4px; }
+  .node-title { font-weight: 700; font-size: 11.5px; color: var(--text); }
+  .node-badge { font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 8px; color: #fff; background: var(--ok); }
+  .node-metrics { font-size: 11px; line-height: 1.42; color: #2c3a47; }
+  .node-metrics div { display: flex; justify-content: space-between; border-bottom: 1px dashed #eef1f5; padding: 1px 0; }
+  .node-metrics div:last-child { border-bottom: 0; }
+  .node-metrics b { font-variant-numeric: tabular-nums; color: #0b3d91; }
+  .node-foot { margin-top: 5px; font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+  .cabins { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: max-content; gap: 6px; }
+  .cabins.single { grid-template-columns: 1fr; }
+  .cabin { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px;
+    display: grid; grid-template-rows: auto auto; gap: 4px; }
+  .cabin h3 { margin: 0; font-size: 12.5px; display: flex; justify-content: space-between; align-items: baseline; }
+  .cabin h3 small { color: var(--muted); font-weight: normal; white-space: nowrap; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 4px; align-content: start; }
+  .tile { position: relative; height: 30px; border-radius: 5px; color: #fff; cursor: pointer; user-select: none;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 600;
+    border: 2px solid transparent; transition: background-color .3s; font-size: 11px; }
+  .tile .bar { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 4px; background: rgba(255,255,255,.35); border-radius: 2px; }
+  .tile .bar b { display: block; height: 100%; background: #fff; border-radius: 2px; }
+  .tile.sel { border-color: var(--sel); box-shadow: 0 0 0 2px rgba(26,115,232,.35); }
+  .s-ok { background: var(--ok); } .s-watch { background: var(--watch); color: #3b2f00; }
+  .s-warning { background: var(--warning); } .s-grid { background: var(--grid); }
+  .s-offline { background: var(--offline); } .s-night { background: var(--night); }
+  .s-thermal { background: var(--thermal); }
+  .s-chronic { background: repeating-linear-gradient(45deg, var(--chronic), var(--chronic) 6px, #b5651a 6px, #b5651a 12px); }
+  .s-alarm { background: var(--alarm); animation: blink 1s steps(2, start) infinite; }
+  .s-holdout { background: repeating-linear-gradient(45deg, #cfd6de, #cfd6de 5px, #e9edf1 5px, #e9edf1 10px); color: #4a5560; }
+  @keyframes blink { to { background: #ffd2cc; color: var(--alarm); } }
+  .err { color: var(--alarm); }
+  details.help { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--text); }
+  details.help summary { cursor: pointer; color: var(--sel); font-weight: 600; }
+  details.help table { border-collapse: collapse; margin-top: 4px; }
+  details.help td { padding: 2px 8px 2px 0; vertical-align: top; }
+  details.help td:first-child { white-space: nowrap; font-weight: 600; }
+  .hz { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hz b { font-size: 12px; }
+  .seg { display: inline-flex; border: 1px solid var(--sel); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; background: var(--card); color: var(--sel); padding: 3px 11px; font: inherit; font-weight: 600; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--sel); }
+  .seg button.on { background: var(--sel); color: #fff; }
+  .hz .lbl { color: var(--muted); }
+  .static .s-alarm { animation: none; }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="hz">
+    <b>Değerlendirme:</b>
+    <span class="seg" id="seg">
+      <button data-h="instant" class="on" title="Şu anki 15 dakikalık adımın durumu">Anlık</button>
+      <button data-h="day" title="Bugün 00:00'dan şimdiye: gün içinde en az 1 saat süren en ağır durum ve günün üretim performansı">Günlük</button>
+      <button data-h="week" title="Son 7 gün: en az 2 günde görülen (tekrarlayan) en ağır durum ve haftanın üretim performansı">Haftalık</button>
+    </span>
+    <span class="lbl" id="hzLabel"></span>
+  </div>
+  <div class="legend" id="legend"></div>
+  <details class="help" id="help"><summary>BTÜ SmartGridLab 5-Düğümlü Topoloji & Durum Tanımları (kutucuk/düğüm tıklanınca sağda ilgili katman açılır)</summary><table id="helpTable"></table></details>
+  <div class="main-area">
+    <div class="topo-box" id="topoBox">
+      <div class="topo-head">
+        <h3>⚡ BTÜ Akıllı Şebekeler Laboratuvarı — Canlı Enerji Akışı ve 21-Sütun Dijital İkiz Topolojisi</h3>
+        <small>Grafik katmanını değiştirmek için aşağıdaki 5 düğümden birine tıklayın</small>
+      </div>
+      <div class="topo-grid" id="topoGrid">
+        <div class="node-card" id="node-METEO-BTU" data-node="METEO-BTU" data-chart="eff_thermal">
+          <div>
+            <div class="node-top"><span class="node-title">1. METEO-BTU</span><span class="node-badge" id="nb-meteo">AÇIK</span></div>
+            <div class="node-metrics" id="nm-meteo">
+              <div><span>POA / Yatay Işınım:</span><b id="v-g">—</b></div>
+              <div><span>Ortam Sıcaklığı (T_amb):</span><b id="v-tamb">—</b></div>
+              <div><span>Rüzgar Hızı (v_wind):</span><b id="v-wind">—</b></div>
+              <div><span>Ross vs Faiman Hücre:</span><b id="v-tcell">—</b></div>
+            </div>
+          </div>
+          <div class="node-foot"><span>Satellite + SmartGridLab</span><span>→ Termal Grafik</span></div>
+        </div>
+
+        <div class="node-card" id="node-PV-ARRAY" data-node="PV-ARRAY" data-chart="dc_mpp">
+          <div>
+            <div class="node-top"><span class="node-title">2. PV-ARRAY (1.20 kWp)</span><span class="node-badge" id="nb-pv">DC AKTİF</span></div>
+            <div class="node-metrics" id="nm-pv">
+              <div><span>DC Gerilim (V_dc):</span><b id="v-vdc">—</b></div>
+              <div><span>DC Akım (I_dc):</span><b id="v-idc">—</b></div>
+              <div><span>DC Güç (P_dc):</span><b id="v-pdc">—</b></div>
+              <div><span>Yalıtım Direnci (R_iso):</span><b id="v-riso">—</b></div>
+            </div>
+          </div>
+          <div class="node-foot"><span>β=32° Güney · Tek MPPT</span><span>→ DC/MPP Grafik</span></div>
+        </div>
+
+        <div class="node-card sel" id="node-WR13TL22-8231" data-node="WR13TL22-8231" data-chart="power">
+          <div>
+            <div class="node-top"><span class="node-title">3. WR13TL22-8231</span><span class="node-badge" id="nb-inv">SAĞLIKLI</span></div>
+            <div class="node-metrics" id="nm-inv">
+              <div><span>AC Güç / Beklenen:</span><b id="v-pac">—</b></div>
+              <div><span>Özgül Güç (P_spec):</span><b id="v-pspec">—</b></div>
+              <div><span>Dönüşüm Verimi (η_inv):</span><b id="v-eff">—</b></div>
+              <div><span>Güç Sınırı / Reset:</span><b id="v-sched">—</b></div>
+            </div>
+          </div>
+          <div class="node-foot"><span>SMA Sunny Boy 1.3</span><span>→ Güç Grafiği</span></div>
+        </div>
+
+        <div class="node-card" id="node-GRID-PCC" data-node="GRID-PCC" data-chart="grid_riso">
+          <div>
+            <div class="node-top"><span class="node-title">4. GRID-PCC (L1-L2-L3)</span><span class="node-badge" id="nb-grid">EN 50160 OK</span></div>
+            <div class="node-metrics" id="nm-grid">
+              <div><span>U_L1,cond (Ham U_L1):</span><b id="v-ul1">—</b></div>
+              <div><span>I_L1 / S_ac (PF):</span><b id="v-il1">—</b></div>
+              <div><span>Frekans (α_relay=k/18):</span><b id="v-fgrid">—</b></div>
+              <div><span>Faz L2 / L3 Doğrulama:</span><b id="v-l23">0.0V / 0.0V (1-Faz)</b></div>
+            </div>
+          </div>
+          <div class="node-foot"><span>k/18 Röle De-aliasing</span><span>→ Şebeke Grafiği</span></div>
+        </div>
+
+        <div class="node-card" id="node-DATA-MANAGER" data-node="DATA-MANAGER" data-chart="power">
+          <div>
+            <div class="node-top"><span class="node-title">5. DATA-MANAGER</span><span class="node-badge" id="nb-dm">MUTABIK</span></div>
+            <div class="node-metrics" id="nm-dm">
+              <div><span>Tesis Sayacı (P_ac,sys):</span><b id="v-psys">—</b></div>
+              <div><span>Sayaç Farkı (ΔP_meter):</span><b id="v-dp">0.000 kW</b></div>
+              <div><span>Sistem P_spec,sys:</span><b id="v-pspecsys">—</b></div>
+              <div><span>T_mod,sat − T_mod,sys:</span><b id="v-dtmod">0.0 °C</b></div>
+            </div>
+          </div>
+          <div class="node-foot"><span>S/N 3011599654</span><span>→ %100 Veri</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="cabins single" id="cabins"><div style="color:var(--muted)">Yükleniyor…</div></div>
+  </div>
+</div>
+<script>
+  const STATES = {
+    ok: "Sağlıklı", watch: "İzle", thermal: "Isıl kısma", warning: "Uyarı", alarm: "Alarm", chronic: "Kronik (bakım kaydı)",
+    grid: "Şebeke/L1 olayı", offline: "Veri yok", night: "Gece", holdout: "Test cihazı (gizli)"
+  };
+  const HELP = {
+    ok: "Üretim, hava koşullarına göre beklenen güce yakın (eksik < %5).",
+    watch: "Hafif sapma: en az 1 saattir %5–10 eksik üretim, düşük R_iso (<1500 kΩ) ya da hafif güç düşürme. İzleniyor.",
+    thermal: "İnvertör/dizi sıcaklığı veya MPP→Voc kayması nedeniyle güç kısılıyor (dV > +6%, dI < -8%).",
+    warning: "En az 1 saattir %10–15 eksik üretim ya da DC dizi akım/gerilim düşüşü.",
+    alarm: "En az 1 saattir %15'ten fazla eksik üretim, evirici durması (trip / DC var AC yok) ya da ciddi dizi kaybı.",
+    chronic: "Uyarı/alarm düzeyindeki aynı sorun 7 günden uzun sürüyor: bakım kaydı açıldı.",
+    grid: "L1 şebeke gerilimi/frekansı EN 50160 sınırları dışında ya da gündüz tam şebeke kaybı (U_L1 = 0 V).",
+    offline: "Bu 15 dakikalık adımda eviriciden veri gelmedi (ör. 27–31 Temmuz dönemi).",
+    night: "Güneş ufkun 5°'den az üzerinde; üretim beklenmiyor.",
+    holdout: "Modelin hiç görmediği test dilimi/cihazı."
+  };
+  const HORIZON_HELP = [
+    ["Anlık", "Şu anki 15 dakikalık adımın durumu ve 5 topoloji düğümünün canlı ölçümleri."],
+    ["Günlük", "Bugün 00:00'dan şimdiye en az 1 saat süren en ağır durum ve günün üretim performansı."],
+    ["Haftalık", "Son 7 günde en az 2 günde (her biri ≥ 1 saat) görülen en ağır durum ve haftanın üretim performansı."],
+    ["k/18 Röle Yasası", "Sabah/akşam düşük ışınımda 18 alt-örneklemin k tanesinde röle kapalıysa f_grid = 50·(k/18) Hz okunur; gerçek gerilim U_L1,cond = U_L1·(50/f_grid) ile geri çatılır."]
+  ];
+  let selected = null;
+  let selectedNode = "WR13TL22-8231";
+  let horizon = "instant";
+
+  function num(v) { return (typeof v === "number" && isFinite(v)) ? v : null; }
+  function txt(v) { return (typeof v === "string") ? v : ""; }
+  function asArray(x) { return Array.isArray(x) ? x : (x === undefined || x === null ? [] : [x]); }
+
+  function setup(htmlComponent) {
+    window.htmlComponent = htmlComponent;
+    renderLegend();
+    htmlComponent.addEventListener("init", e => buildCabins(e.Data));
+    htmlComponent.addEventListener("update", e => applyUpdate(e.Data));
+    htmlComponent.addEventListener("select", e => markSelected(e.Data.id));
+    htmlComponent.addEventListener("error", e => showError(e.Data));
+    document.querySelectorAll("#seg button").forEach(b => b.addEventListener("click", () => {
+      window.htmlComponent.sendEventToMATLAB("horizon", { h: b.dataset.h });
+    }));
+    document.querySelectorAll(".node-card").forEach(card => card.addEventListener("click", () => {
+      document.querySelectorAll(".node-card").forEach(c => c.classList.remove("sel"));
+      card.classList.add("sel");
+      selectedNode = card.dataset.node;
+      window.htmlComponent.sendEventToMATLAB("nodeClicked", {
+        node: card.dataset.node,
+        chart: card.dataset.chart,
+        id: selected || "K01-INV01"
+      });
+    }));
+    htmlComponent.sendEventToMATLAB("ready", {});
+  }
+
+  function setHorizon(h, label) {
+    horizon = h || "instant";
+    document.querySelectorAll("#seg button").forEach(b => b.classList.toggle("on", b.dataset.h === horizon));
+    document.getElementById("wrap").classList.toggle("static", horizon !== "instant");
+    document.getElementById("hzLabel").textContent = label;
+  }
+
+  function renderLegend() {
+    const el = document.getElementById("legend");
+    el.innerHTML = Object.entries(STATES).map(([k, v]) =>
+      `<span title="${HELP[k]}"><i class="s-${k}" style="animation:none"></i>${v}</span>`).join("");
+    document.getElementById("helpTable").innerHTML =
+      HORIZON_HELP.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("") +
+      `<tr><td colspan="2" style="padding-top:6px;color:var(--muted)">Durumlar:</td></tr>` +
+      Object.entries(STATES).map(([k, v]) =>
+      `<tr><td><i class="s-${k}" style="animation:none;display:inline-block;width:10px;height:10px;border-radius:2px"></i> ${v}</td><td>${HELP[k]}</td></tr>`).join("");
+  }
+
+  function buildCabins(data) {
+    const root = document.getElementById("cabins");
+    root.innerHTML = "";
+    const cabs = asArray(data.cabins);
+    root.classList.toggle("single", cabs.length <= 1);
+    cabs.forEach(c => {
+      const card = document.createElement("div");
+      card.className = "cabin";
+      const cabTitle = cabs.length <= 1 ? `BTÜ SmartGridLab Saha Birimi (Kabin ${c.cabin} · SMA WR13TL22-8231)` : `Kabin ${c.cabin}`;
+      card.innerHTML = `<h3>${cabTitle} <small id="cnt-${c.cabin}"></small></h3><div class="tiles"></div>`;
+      const tiles = card.querySelector(".tiles");
+      asArray(c.ids).forEach(id => {
+        const t = document.createElement("div");
+        t.className = "tile s-offline";
+        t.id = "t-" + id;
+        t.dataset.id = id;
+        const shortLbl = id.includes("-INV") ? (cabs.length <= 1 ? `${id} · WR13TL22` : id.split("-INV")[1]) : id;
+        t.innerHTML = `<span>${shortLbl}</span><div class="bar"><b style="width:0%"></b></div>`;
+        t.title = id;
+        t.addEventListener("click", () => {
+          window.htmlComponent.sendEventToMATLAB("tileClicked", { id: id });
+        });
+        tiles.appendChild(t);
+      });
+      root.appendChild(card);
+    });
+    asArray(data.holdout).forEach(id => {
+      const t = document.getElementById("t-" + id);
+      if (t) { t.className = "tile s-holdout"; t.title = id + " — test cihazı, verisi değerlendirmeye kadar gizli"; }
+    });
+  }
+
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+
+  function applyTopology(tp, st) {
+    if (!tp) return;
+    const g = num(tp.Gpoa !== undefined ? tp.Gpoa : tp.G);
+    const gh = num(tp.Ghoriz);
+    const tamb = num(tp.Tamb);
+    const wind = num(tp.Wind);
+    const tmod = num(tp.Tmod);
+    const tcell = num(tp.Tcell);
+    setText("v-g", g === null ? "—" : `${g.toFixed(0)} W/m²${gh !== null ? ` (GHI ${gh.toFixed(0)})` : ""}`);
+    setText("v-tamb", tamb === null ? "—" : `${tamb.toFixed(1)} °C`);
+    setText("v-wind", wind === null ? "—" : `${wind.toFixed(2)} m/s`);
+    setText("v-tcell", tmod === null ? "—" : `${tmod.toFixed(1)} / ${tcell !== null ? tcell.toFixed(1) : tmod.toFixed(1)} °C`);
+    const nbMeteo = document.getElementById("nb-meteo");
+    if (nbMeteo) {
+      nbMeteo.textContent = (g === null || g < 20) ? "GECE" : (g >= 500 ? "AÇIK GÖK" : "BULUTLU");
+      nbMeteo.style.background = (g === null || g < 20) ? "var(--night)" : "var(--ok)";
+    }
+
+    const vdc = num(tp.Vdc), idc = num(tp.Idc), pdc = num(tp.Pact), riso = num(tp.Riso);
+    setText("v-vdc", vdc === null ? "veri yok" : `${vdc.toFixed(1)} V`);
+    setText("v-idc", idc === null ? "veri yok" : `${idc.toFixed(2)} A`);
+    setText("v-pdc", pdc === null ? "veri yok" : `${pdc.toFixed(2)} kW`);
+    setText("v-riso", riso === null ? "—" : `${riso.toFixed(0)} kΩ${riso < 1500 ? " (Çiğ/Nem)" : ""}`);
+    const nbPv = document.getElementById("nb-pv");
+    if (nbPv) {
+      nbPv.textContent = vdc === null ? "VERİ YOK" : (riso !== null && riso < 1500 ? "ÇİĞ/NEM İZLE" : "MPP AKTİF");
+      nbPv.style.background = vdc === null ? "var(--offline)" : (riso !== null && riso < 1500 ? "var(--watch)" : "var(--ok)");
+    }
+
+    const pac = num(tp.Pac !== undefined ? tp.Pac : tp.Pact), pexp = num(tp.Pexp), pspec = num(tp.PacSpec), eff = num(tp.Eff), sched = num(tp.SchedP);
+    setText("v-pac", `${pac === null ? "—" : pac.toFixed(2) + " kW"} / ${pexp === null ? "—" : pexp.toFixed(2) + " kW"}`);
+    setText("v-pspec", pspec === null ? "—" : `${pspec.toFixed(2)} kW/kWp`);
+    setText("v-eff", eff === null ? "—" : `%${(eff <= 1.2 ? eff * 100 : eff).toFixed(1)}`);
+    setText("v-sched", sched !== null ? `%${sched.toFixed(0)} (REBOOT)` : "100% (Sınırsız)");
+    const nbInv = document.getElementById("nb-inv");
+    if (nbInv && st) {
+      nbInv.textContent = (STATES[st] || st).toUpperCase();
+      nbInv.style.background = `var(--${st === "holdout" ? "offline" : st})`;
+    }
+
+    const ul1 = num(tp.Vgrid), ul1c = num(tp.VgridCond), il1 = num(tp.Igrid), fg = num(tp.Fgrid), alpha = num(tp.AlphaRelay);
+    setText("v-ul1", ul1 === null ? "—" : `${(ul1c !== null ? ul1c : ul1).toFixed(1)} V (${ul1.toFixed(0)} V)`);
+    setText("v-il1", il1 === null ? "—" : `${il1.toFixed(2)} A (PF 1.00)`);
+    const k18 = alpha !== null ? Math.round(alpha * 18) : (fg !== null ? Math.round((fg / 50) * 18) : 18);
+    setText("v-fgrid", fg === null ? "—" : `${fg.toFixed(2)} Hz (${k18}/18)`);
+    const nbGrid = document.getElementById("nb-grid");
+    if (nbGrid) {
+      const relayMode = fg !== null && fg > 0 && fg < 49.0;
+      const gridLoss = fg === 0 && vdc !== null && vdc > 150;
+      nbGrid.textContent = gridLoss ? "ŞEBEKE KAYBI" : (relayMode ? `RÖLE ${k18}/18` : (ul1 === null ? "VERİ YOK" : "EN 50160 OK"));
+      nbGrid.style.background = gridLoss ? "var(--grid)" : (relayMode ? "var(--watch)" : (ul1 === null ? "var(--offline)" : "var(--ok)"));
+    }
+
+    const psys = num(tp.PacSys !== undefined ? tp.PacSys : pac);
+    const dp = (pac !== null && psys !== null) ? Math.abs(pac - psys) : 0;
+    setText("v-psys", psys === null ? "—" : `${psys.toFixed(2)} kW`);
+    setText("v-dp", `${dp.toFixed(3)} kW (Mutabık)`);
+    setText("v-pspecsys", pspec === null ? "—" : `${pspec.toFixed(2)} kW/kWp`);
+  }
+
+  function applyUpdate(data) {
+    setHorizon(txt(data.horizon), txt(data.label));
+    const counts = {};
+    const tiles = asArray(data.tiles);
+    tiles.forEach(x => {
+      try {
+        const t = document.getElementById("t-" + x.id);
+        if (!t || t.classList.contains("s-holdout")) return;
+        t.className = "tile s-" + x.state + (x.id === selected ? " sel" : "");
+        const p = num(x.p), pexp = num(x.pexp), r = num(x.ratio);
+        const ratio = (r !== null) ? Math.max(0, Math.min(1.2, r)) : 0;
+        t.querySelector(".bar b").style.width = (100 * Math.min(ratio, 1)).toFixed(0) + "%";
+        const pTxt = (p === null) ? "veri yok" : p.toFixed(2) + " kW";
+        const eTxt = (pexp === null) ? "—" : pexp.toFixed(2) + " kW";
+        const tip = txt(x.tip);
+        t.title = tip !== "" ? tip : `${x.id}\n${STATES[x.state] || x.state}: ${HELP[x.state] || ""}\nGüç ${pTxt} / beklenen ${eTxt}`;
+        const cab = x.id.substring(1, 3).replace(/^0/, "");
+        counts[cab] = counts[cab] || { alarm: 0, warning: 0, chronic: 0, thermal: 0, offline: 0, n: 0 };
+        counts[cab].n++;
+        if (counts[cab][x.state] !== undefined) counts[cab][x.state]++;
+      } catch (err) {
+        showError(x.id + ": " + err.message);
+      }
+    });
+    if (data.topology) {
+      applyTopology(data.topology, tiles.length > 0 ? tiles[0].state : "ok");
+    } else if (tiles.length > 0) {
+      applyTopology({ Pact: tiles[0].p, Pexp: tiles[0].pexp }, tiles[0].state);
+    }
+    Object.entries(counts).forEach(([cab, c]) => {
+      const el = document.getElementById("cnt-" + cab);
+      if (el) el.textContent = `alarm ${c.alarm} · uyarı ${c.warning} · ısıl kısma ${c.thermal} · kronik ${c.chronic} · veri yok ${c.offline}/${c.n}`;
+    });
+  }
+
+  function markSelected(id) {
+    if (selected) { const p = document.getElementById("t-" + selected); if (p) p.classList.remove("sel"); }
+    selected = id;
+    const t = document.getElementById("t-" + id);
+    if (t) t.classList.add("sel");
+  }
+
+  function showError(msg) {
+    const el = document.getElementById("legend");
+    el.insertAdjacentHTML("beforeend", `<span class="err">Hata: ${String(msg)}</span>`);
+  }
+</script>
+</body>
+</html>

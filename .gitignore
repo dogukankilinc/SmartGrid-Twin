@@ -1,0 +1,63 @@
+# ==============================================================================
+# SmartGrid-Twin .gitignore
+# ==============================================================================
+
+# --- Raw Data & Proprietary Datasets (STRICTLY EXCLUDED) ---
+*.csv
+*.CSV
+*.tsv
+*.xlsx
+*.xls
+data/*.csv
+data/**/*.csv
+data_holdout/
+test_verisi/
+
+# --- Generated Artifacts, Intermediate Caches & Model Checkpoints ---
+artifacts/feedback/*
+!artifacts/feedback/.gitkeep
+artifacts/final/*
+!artifacts/final/.gitkeep
+artifacts/interim/*
+!artifacts/interim/.gitkeep
+artifacts/logs/*
+!artifacts/logs/.gitkeep
+artifacts/models/*
+!artifacts/models/.gitkeep
+artifacts/processed/*
+!artifacts/processed/.gitkeep
+artifacts/runtime/*
+!artifacts/runtime/.gitkeep
+artifacts/v2/*
+!artifacts/v2/.gitkeep
+artifacts/v3/*
+!artifacts/v3/.gitkeep
+
+# Exclude generated figures, scalogram datasets & workspace caches
+scalogram_v2/
+workspace/
+
+# --- MATLAB Runtime & Workspace Files ---
+*.mat
+!tests/golden/*.mat
+*.asv
+*.m~
+*.mex*
+*.mlx.autosave
+slprj/
+
+# --- Logs & Transcripts ---
+*.log
+transcript*.jsonl
+
+# --- OS & Editor Specific ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.vscode/
+.idea/
+.gemini/
+.claude/
+*.tmp

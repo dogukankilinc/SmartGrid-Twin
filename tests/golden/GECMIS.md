@@ -1,0 +1,2 @@
+- 2026-10-12 11:03: ilk kayıt: v3 üç görüş + uzlaşı, çekirdek/araştırma katmanları (2026-10-12)
+- 2026-10-12 11:09: M1 ölçütü v2-C01 tanımına çekildi (m1Features sağlıklı + kısılmamış); panel teşhis metni sütun düzeltmesi
